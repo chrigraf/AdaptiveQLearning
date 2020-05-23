@@ -120,7 +120,7 @@ class AmbulanceEnvironment(Environment):
         '''
         old_state = self.state
         # new state is sampled from the arrivals distribution
-        newState = self.arrivals()
+        newState = self.arrivals(self.timestep)
 
         # Cost is a linear combination of the distance traveled to the action
         # and the distance served to the pickup
@@ -139,7 +139,7 @@ class AmbulanceEnvironment(Environment):
 '''An oil environment also over [0,1].  Here the agent interacts with the environment
 by picking a location to travel to, paying a cost of travel, and receiving a reward at the new location.'''
 class OilEnvironment(Environment):
-    def __init__(self, epLen, oil_prob, starting_state):
+    def __init__(self, epLen, oil_prob, starting_state, cost_param, noise_variance):
         '''
         epLen - number of steps
         oil_prob - a function returning a reward in [0,1] for being in a state
@@ -150,6 +150,8 @@ class OilEnvironment(Environment):
         self.starting_state = starting_state
         self.timestep = 0
         self.oil_prob = oil_prob
+        self.cost_param = cost_param
+        self.noise_variance = noise_variance
 
 
     def get_epLen(self):
@@ -173,8 +175,8 @@ class OilEnvironment(Environment):
         '''
 
 
-        reward = max(self.oil_prob(action) - np.abs(self.state - action),0)
-        newState = action
+        reward = min(1, max(self.oil_prob(self.state, action) - self.cost_param*np.abs(self.state - action),0))
+        newState = min(1, max(0, action + np.random.normal(0, self.noise_variance(self.state, action))))
 
         if self.timestep == self.epLen:
             pContinue = 0
@@ -247,17 +249,17 @@ class TestContinuousEnvironment(Environment):
 #-------------------------------------------------------------------------------
 # Benchmark environments used when running an experiment
 
-def oil_prob_1(x, lam):
-    return np.exp(-1*lam*np.abs(x - 0.7-np.pi/60))
+def oil_prob_1(x, lam, c):
+    return np.exp(-1*lam*np.abs(x - c))
 
-def oil_prob_2(x, lam):
-    return 1 - lam*(x-0.7-np.pi/60)**2
+def oil_prob_2(x, lam, c):
+    return 1 - lam*(x-c)**2
 
 def makeLaplaceOil(epLen, lam, starting_state):
-    return OilEnvironment(epLen, lambda x: oil_prob_1(x, lam), starting_state)
+    return OilEnvironment(epLen, lambda x,a: oil_prob_1(x, lam, .75), starting_state, 0, lambda x,a : 0)
 
 def makeQuadraticOil(epLen, lam, starting_state):
-    return OilEnvironment(epLen, lambda x: oil_prob_2(x, lam), starting_state)
+    return OilEnvironment(epLen, lambda x,a: oil_prob_2(x, lam, .75), starting_state, 0, lambda x,a : 0)
 
 def makeTestMDP(epLen):
     return TestContinuousEnvironment(epLen)

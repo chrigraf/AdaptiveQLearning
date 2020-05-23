@@ -44,7 +44,7 @@ class AdaptiveModelBasedDiscretization(agent.FiniteHorizonAgent):
 
     def update_obs(self, obs, action, reward, newObs, timestep):
         '''Add observation to records'''
-        print('Updating observations at step: ' + str(timestep))
+        # print('Updating observations at step: ' + str(timestep))
         # print('Old state: ' + str(obs) + ' action: ' + str(action) + ' newState: ' + str(newObs))
         # Gets the active trees based on current timestep
         tree = self.tree_list[timestep]

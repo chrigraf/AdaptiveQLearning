@@ -87,7 +87,7 @@ class Tree():
             # self.state_leaves.append(child.state_val)
             self.state_leaves.append(children[0].state_val)
             self.state_leaves.append(children[2].state_val)
-            self.vEst.append(parent_vEst) 
+            self.vEst.append(parent_vEst)
             self.vEst.append(parent_vEst)
             # print('Checking lengths: ')
             # print(len(self.state_leaves))
