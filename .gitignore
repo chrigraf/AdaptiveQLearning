@@ -1,54 +1,143 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
 
-data/oil_quadratic_net_50.csv
-data/oil_quadratic_net_10.csv
-data/oil_quadratic_net_1.csv
-data/oil_quadratic_agent_50.obj
-data/oil_quadratic_agent_10.obj
-data/oil_quadratic_agent_1.obj
-data/oil_quadratic_adapt_50.csv
-data/oil_quadratic_adapt_10.csv
-data/oil_quadratic_adapt_1.csv
-data/oil_laplace_net_50.csv
-data/oil_laplace_net_10.csv
-data/oil_laplace_net_1.csv
-data/oil_laplace_agent_50.obj
-data/oil_laplace_agent_10.obj
-data/oil_laplace_agent_1.obj
-data/oil_laplace_adapt_50.csv
-data/oil_laplace_adapt_10.csv
-data/oil_laplace_adapt_1.csv
-data/ambulance_uniform_no_25.csv
-data/ambulance_uniform_no_1.csv
-data/ambulance_uniform_no_0.csv
-data/ambulance_uniform_net_25.csv
-data/ambulance_uniform_net_1.csv
-data/ambulance_uniform_net_0.csv
-data/ambulance_uniform_median_25.csv
-data/ambulance_uniform_median_1.csv
-data/ambulance_uniform_median_0.csv
-data/ambulance_uniform_agent_25.obj
-data/ambulance_uniform_agent_1.obj
-data/ambulance_uniform_agent_0.obj
-data/ambulance_uniform_adapt_model_25.csv
-data/ambulance_uniform_adapt_model_1.csv
-data/ambulance_uniform_adapt_model_0.csv
-data/ambulance_uniform_adapt_25.csv
-data/ambulance_uniform_adapt_1.csv
-data/ambulance_uniform_adapt_0.csv
-data/ambulance_beta_no_25.csv
-data/ambulance_beta_no_1.csv
-data/ambulance_beta_no_0.csv
-data/ambulance_beta_net_model_1.csv
-data/ambulance_beta_net_25.csv
-data/ambulance_beta_net_1.csv
-data/ambulance_beta_net_0.csv
-data/ambulance_beta_median_25.csv
-data/ambulance_beta_median_1.csv
-data/ambulance_beta_median_0.csv
-data/ambulance_beta_agent_25.obj
-data/ambulance_beta_agent_1.obj
-data/ambulance_beta_agent_0.obj
-data/ambulance_beta_adapt_model_1.csv
-data/ambulance_beta_adapt_25.csv
-data/ambulance_beta_adapt_1.csv
-data/ambulance_beta_adapt_0.csv
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+.pybuilder/
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+#   For a library or package, you might want to ignore these files since the code is
+#   intended to run in multiple environments; otherwise, check them in:
+# .python-version
+
+# pipenv
+#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.
+#   However, in case of collaboration, if having platform-specific dependencies or dependencies
+#   having no cross-platform support, pipenv may install dependencies that don't work, or not
+#   install all needed dependencies.
+#Pipfile.lock
+
+# PEP 582; used by e.g. github.com/David-OConnor/pyflow
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+
+data/*
+*.ipynb
+tmp.csv
