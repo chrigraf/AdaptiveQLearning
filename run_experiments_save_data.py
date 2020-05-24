@@ -21,7 +21,7 @@ for problem in ambulance_list:
 
         epLen = 5
         nEps = 2000
-        numIters = 2
+        numIters = 10
         if problem == 'beta':
             def arrivals(step):
                 return np.random.beta(5,2)
@@ -101,5 +101,5 @@ for problem in ambulance_list:
 
         # SAVING DATA TO CSV
 
-        dt_adapt.to_csv('ambulance_'+problem+'_adapt_model_'+param+'.csv')
-        dt_net.to_csv('ambulance_'+problem+'_net_model_'+param+'.csv')
+        dt_adapt.to_csv('./data/ambulance_'+problem+'_adapt_model_'+param+'.csv')
+        dt_net.to_csv('./data/ambulance_'+problem+'_net_model_'+param+'.csv')

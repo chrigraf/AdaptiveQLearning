@@ -41,7 +41,7 @@ class Node():
 class Tree():
     # Defines a tree by the number of steps for the initialization
     def __init__(self, epLen):
-        self.head = Node(epLen, 0, [1], 0, 0, .5, .5, .5)
+        self.head = Node(epLen, 0, [0], 0, 0, .5, .5, .5)
         self.epLen = epLen
         self.state_leaves = [.5]
         self.vEst = [self.epLen]
@@ -126,7 +126,7 @@ class Tree():
             # print(len(node.pEst))
             # print('Adding on entries now!')
             for i in range(num_children):
-                node.pEst.append(pEst_parent / 2)
+                node.pEst.append(pEst_parent / num_children)
             # print(len(node.pEst))
             # print(node.pEst)
             # print('Done')

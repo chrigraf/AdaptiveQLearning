@@ -58,6 +58,8 @@ class eNet(agent.FiniteHorizonAgent):
     def update_policy(self, k):
         '''Update internal policy based upon records'''
         self.greedy = self.greedy
+        # print('Update policy episode: ' + str(k))
+        # print(self.qVals[self.epLen-1, :, :])
 
 
     def greedy(self, state, timestep, epsilon=0):

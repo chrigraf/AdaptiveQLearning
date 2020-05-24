@@ -46,7 +46,6 @@ class AdaptiveModelBasedDiscretization(agent.FiniteHorizonAgent):
         '''Add observation to records'''
         # print('Updating observations at step: ' + str(timestep))
         # print('Old state: ' + str(obs) + ' action: ' + str(action) + ' newState: ' + str(newObs))
-        # print('Reward: ' + str(reward))
         # Gets the active trees based on current timestep
         tree = self.tree_list[timestep]
 
@@ -58,21 +57,28 @@ class AdaptiveModelBasedDiscretization(agent.FiniteHorizonAgent):
         # print('Num visits: ' + str(t))
         # Update empirical estimate of average reward for that node
         active_node.rEst = ((t-1)*active_node.rEst + reward) / t
-        # print('Mean reward: ' + str(active_node.rEst))
 
-        if timestep != self.epLen - 1:
+
+        if timestep == self.epLen - 1:
+            vEst = 0
+
+        else:
             next_tree = self.tree_list[timestep+1]
             # update transition kernel based off of new transition
             # print(next_tree.state_leaves)
             new_obs_loc = np.argmin(np.abs(np.asarray(next_tree.state_leaves) - newObs))
             active_node.pEst[new_obs_loc] += 1
-            # print('Updating transition estimates!')
-            # print(active_node.pEst)
-            # print(next_tree.state_leaves)
+            transition = np.asarray(active_node.pEst)
+            # print(transition / np.sum(transition))
+            # print(next_tree.vEst)
+            # print(np.dot(np.asarray(next_tree.vEst), transition / np.sum(transition)))
+            vEst = min(self.epLen, np.dot(np.asarray(next_tree.vEst), transition / np.sum(transition)))
+
+        bonus = self.scaling*np.sqrt(1/t)
+        active_node.qVal = vEst + active_node.rEst + bonus
 
         '''determines if it is time to split the current ball'''
         if t >= 4**active_node.num_splits:
-            # print('Splitting a ball!!!!')
             if timestep >= 1:
                 children = tree.split_node(active_node, timestep, self.tree_list[timestep-1])
             else:
@@ -80,37 +86,14 @@ class AdaptiveModelBasedDiscretization(agent.FiniteHorizonAgent):
 
     def update_policy(self, k):
         '''Update internal policy based upon records'''
-        # print('#######################')
-        # print('Recomputing estimates at the end of an episode')
-        # print('#######################')
-        for h in np.arange(self.epLen-1,-1,-1):
-            # print('Estimates for step: ' + str(h))
-            tree = self.tree_list[h]
-            for node in tree.tree_leaves:
-                if node.num_visits == 0:
-                    node.qVal = self.epLen
-                else:
-                    if h == self.epLen - 1:
-                        # print(node.qVal)
-                        # print(self.epLen)
-                        # print(node.rEst)
-                        node.qVal = min(node.qVal, self.epLen, node.rEst + self.scaling / np.sqrt(node.num_visits))
-                    else:
-                        next_tree = self.tree_list[h+1]
-                        vEst = np.dot(node.pEst / np.sum(node.pEst), next_tree.vEst)
-                        node.qVal = min(node.qVal, self.epLen, node.rEst + vEst + self.scaling / np.sqrt(node.num_visits))
-                # print(node.state_val, node.action_val, node.qVal)
-            index = 0
-            for state_val in tree.state_leaves:
-                _, qMax = tree.get_active_ball(state_val)
-                tree.vEst[index] = min(qMax, self.epLen, tree.vEst[index])
-                index += 1
-            # print('### PRINTING STATE LEAVES  AND VALUE ESTIMATES!')
-            # print(tree.state_leaves)
-            # print(tree.vEst)
-            # print('#### DDONEE ###')
-
         self.greedy = self.greedy
+        # Should update value function estimate for induced leaves at this step
+        # for tree in self.tree_list:
+        #     index = 0
+        #     for state_val in tree.state_leaves:
+        #         _, qMax = get_active_ball(state_val)
+        #         tree.vEst[index] = min(self.epLen, qMax)
+        #         index += 1
 
         pass
 
