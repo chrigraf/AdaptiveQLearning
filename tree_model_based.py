@@ -7,7 +7,7 @@ import matplotlib.patches as patches
 
 ''' First defines the node class by storing all relevant information'''
 class Node():
-    def __init__(self, qVal, rEst, pEst, num_visits, num_splits, state_val, action_val, radius):
+    def __init__(self, qVal, rEst, pEst, num_visits, num_unique_visits, num_splits, state_val, action_val, radius):
         '''args:
         qVal - estimate of the q value
         num_visits - number of visits to the node or its ancestors
@@ -19,20 +19,26 @@ class Node():
         self.rEst = rEst
         self.pEst = pEst
         self.num_visits = num_visits
+        self.num_unique_visits = num_unique_visits
         self.num_splits = num_splits
         self.state_val = state_val
         self.action_val = action_val
         self.radius = radius
-        self.flag = False
         self.children = None
 
         # Splits a node by covering it with four children, as here S times A is [0,1]^2
         # each with half the radius
-    def split_node(self):
-        child_1 = Node(self.qVal,self.rEst, list.copy(self.pEst), self.num_visits, self.num_splits+1, self.state_val+self.radius/2, self.action_val+self.radius/2, self.radius*(1/2))
-        child_2 = Node(self.qVal, self.rEst, list.copy(self.pEst), self.num_visits, self.num_splits+1, self.state_val+self.radius/2, self.action_val-self.radius/2, self.radius*(1/2))
-        child_3 = Node(self.qVal, self.rEst, list.copy(self.pEst), self.num_visits, self.num_splits+1, self.state_val-self.radius/2, self.action_val+self.radius/2, self.radius*(1/2))
-        child_4 = Node(self.qVal, self.rEst, list.copy(self.pEst), self.num_visits, self.num_splits+1, self.state_val-self.radius/2, self.action_val-self.radius/2, self.radius*(1/2))
+    def split_node(self, flag, epLen):
+        if flag == False:
+            child_1 = Node(self.qVal,self.rEst, list.copy(self.pEst), self.num_visits, self.num_visits, self.num_splits+1, self.state_val+self.radius/2, self.action_val+self.radius/2, self.radius*(1/2))
+            child_2 = Node(self.qVal, self.rEst, list.copy(self.pEst), self.num_visits, self.num_visits, self.num_splits+1, self.state_val+self.radius/2, self.action_val-self.radius/2, self.radius*(1/2))
+            child_3 = Node(self.qVal, self.rEst, list.copy(self.pEst), self.num_visits, self.num_visits, self.num_splits+1, self.state_val-self.radius/2, self.action_val+self.radius/2, self.radius*(1/2))
+            child_4 = Node(self.qVal, self.rEst, list.copy(self.pEst), self.num_visits, self.num_visits, self.num_splits+1, self.state_val-self.radius/2, self.action_val-self.radius/2, self.radius*(1/2))
+        else:
+            child_1 = Node(epLen,0, np.zeros(len(self.pEst)).tolist(), self.num_visits, 0, self.num_splits+1, self.state_val+self.radius/2, self.action_val+self.radius/2, self.radius*(1/2))
+            child_2 = Node(epLen,0, np.zeros(len(self.pEst)).tolist(), self.num_visits, 0, self.num_splits+1, self.state_val+self.radius/2, self.action_val-self.radius/2, self.radius*(1/2))
+            child_3 = Node(epLen,0, np.zeros(len(self.pEst)).tolist(), self.num_visits, 0, self.num_splits+1, self.state_val-self.radius/2, self.action_val+self.radius/2, self.radius*(1/2))
+            child_4 = Node(epLen,0, np.zeros(len(self.pEst)).tolist(), self.num_visits, 0, self.num_splits+1, self.state_val-self.radius/2, self.action_val-self.radius/2, self.radius*(1/2))
         self.children = [child_1, child_2, child_3, child_4]
         return self.children
 
@@ -40,10 +46,11 @@ class Node():
 '''The tree class consists of a hierarchy of nodes'''
 class Tree():
     # Defines a tree by the number of steps for the initialization
-    def __init__(self, epLen):
-        self.head = Node(epLen, 0, [0], 0, 0, .5, .5, .5)
+    def __init__(self, epLen, flag):
+        self.head = Node(epLen, 0, [0], 0, 0, 0, .5, .5, .5)
         self.epLen = epLen
-        self.state_leaves = [.5]
+        self.flag = flag
+        self.state_leaves = [.5] # [(.5, .5)]
         self.vEst = [self.epLen]
         self.tree_leaves = [self.head]
 
@@ -52,11 +59,10 @@ class Tree():
         return self.head
 
     def split_node(self, node, timestep, previous_tree):
-        children = node.split_node()
+        children = node.split_node(self.flag, self.epLen)
 
         # Update the list of leaves in the tree
         self.tree_leaves.remove(node)
-
         for child in children:
             self.tree_leaves.append(child)
 
@@ -67,6 +73,8 @@ class Tree():
         # Gets one of their state value
         child_1_state = children[0].state_val
         child_1_radius = children[0].radius
+
+        # if np.min(np.max(np.abs(state_1 - child_state_1), np.abs(state_2 - child_state_2))) >= child_1_radius
         if np.min(np.abs(np.asarray(self.state_leaves) - child_1_state)) >= child_1_radius:
             # print('Adjusting the induced state partition')
             # print('Current node state: ' + str(node.state_val))
@@ -85,6 +93,8 @@ class Tree():
             # will be appending duplicate numbers here
 
             # self.state_leaves.append(child.state_val)
+
+            # append(children[0].state_val(0), children[0].state_val(1))
             self.state_leaves.append(children[0].state_val)
             self.state_leaves.append(children[2].state_val)
             self.vEst.append(parent_vEst)

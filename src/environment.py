@@ -175,7 +175,7 @@ class OilEnvironment(Environment):
         '''
 
 
-        reward = min(1, max(self.oil_prob(self.state, action) - self.cost_param*np.abs(self.state - action),0))
+        reward = min(1, max(self.oil_prob(self.state, action, self.timestep) - self.cost_param*np.abs(self.state - action),0))
         newState = min(1, max(0, action + np.random.normal(0, self.noise_variance(self.state, action))))
 
         if self.timestep == self.epLen:
@@ -254,6 +254,9 @@ def oil_prob_1(x, lam, c):
 
 def oil_prob_2(x, lam, c):
     return 1 - lam*(x-c)**2
+
+def makeOilEnvironment(epLen, oil_prob, starting_state, cost_param, noise_variance):
+    return OilEnvironment(epLen, oil_prob, starting_state, cost_param, noise_variance)
 
 def makeLaplaceOil(epLen, lam, starting_state):
     return OilEnvironment(epLen, lambda x,a: oil_prob_1(x, lam, .75), starting_state, 0, lambda x,a : 0)

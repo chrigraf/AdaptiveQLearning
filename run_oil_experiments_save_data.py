@@ -14,15 +14,15 @@ import pickle
 ''' Defining parameters to be used in the experiment'''
 
 # ambulance_list = ['laplace', 'quadratic']
-ambulance_list = ['noise']
-param_list_ambulance = ['1']
+ambulance_list = ['noise', 'laplace', 'quadratic', 'noise_step']
+param_list_ambulance = ['1', '10', '50']
 
 for problem in ambulance_list:
     for param in param_list_ambulance:
 
         epLen = 5
-        nEps = 1500
-        numIters = 5
+        nEps = 1000
+        numIters = 25
 
         starting_state = 0.5
         if param == '1':
@@ -37,8 +37,9 @@ for problem in ambulance_list:
         elif problem == 'quadratic':
             env = environment.makeQuadraticOil(epLen, lam, starting_state)
         elif problem == 'noise':
-            env = environment.makeOilEnvironment(epLen, lambda x,a: np.exp(-1*lam*np.abs(x*a - .7)), starting_state, 1, lambda x,a : .1*(x+a)**2)
-
+            env = environment.makeOilEnvironment(epLen, lambda x,a, step: np.exp(-1*lam*np.abs(x*a - .7)), starting_state, 1, lambda x,a : .1*(x+a)**2)
+        elif problem == 'noise_step':
+            env = environment.makeOilEnvironment(epLen, lambda x,a, step: np.exp(-1*lam*np.abs(x*a - .7)), starting_state, 1, lambda x,a : .1*(x+a)**2)
         ##### PARAMETER TUNING FOR AMBULANCE ENVIRONMENT
         scaling_list = [0.01, 0.1, 0.5, 1]
         # scaling_list = [0.01, 0.1, 0.25, 0.4, 0.5, 0.6, 0.75, 1, 1.5, 2, 5]
@@ -48,8 +49,10 @@ for problem in ambulance_list:
         max_reward_adapt = 0
         max_reward_e_net = 0
         opt_adapt_scaling = 0.01
+        opt_adapt_flag_scaling = 0.01
         opt_e_net_scaling = 0.01
 
+        max_reward_adapt_flag_model = 0
         max_reward_adapt_model = 0
         max_reward_e_net_model = 0
         opt_adapt_model_scaling = 0.01
@@ -63,7 +66,7 @@ for problem in ambulance_list:
             #
             agent_list_adap = []
             for _ in range(numIters):
-                agent_list_adap.append(AdaptiveModelBasedDiscretization(epLen, nEps, scaling))
+                agent_list_adap.append(AdaptiveModelBasedDiscretization(epLen, nEps, scaling, 0, False))
             #
             dict = {'seed': 1, 'epFreq' : 1, 'targetPath': './tmp.csv', 'deBug' : False, 'nEps': nEps, 'recFreq' : 10, 'numIters' : numIters}
             #
@@ -76,6 +79,22 @@ for problem in ambulance_list:
                 opt_adapt_model_scaling = scaling
                 dt_adapt_model = dt_adapt_data
                 opt_adapt_model_agent_list = agent_list_adap
+
+            agent_list_adap = []
+            for _ in range(numIters):
+                agent_list_adap.append(AdaptiveModelBasedDiscretization(epLen, nEps, scaling, 0, True))
+            #
+            dict = {'seed': 1, 'epFreq' : 1, 'targetPath': './tmp.csv', 'deBug' : False, 'nEps': nEps, 'recFreq' : 10, 'numIters' : numIters}
+            #
+            exp = experiment.Experiment(env, agent_list_adap, dict)
+            adap_fig = exp.run()
+            dt_adapt_flag_data = exp.save_data()
+
+            if (dt_adapt_flag_data.groupby(['episode']).mean().tail(1))['epReward'].iloc[0] > max_reward_adapt_flag_model:
+                max_reward_adapt_flag_model = (dt_adapt_flag_data.groupby(['episode']).mean().tail(1))['epReward'].iloc[0]
+                opt_adapt_flag_model_scaling = scaling
+                dt_adapt_flag_model = dt_adapt_flag_data
+                opt_adapt_flag_model_agent_list = agent_list_adap
 
             # RUNNING EXPERIMENT FOR EPSILON NET MODEL ALGORITHM
             #
@@ -147,6 +166,15 @@ for problem in ambulance_list:
 
         # SAVING DATA TO CSV
         dt_adapt.to_csv('./data/oil_'+problem+'_adapt_'+param+'.csv')
+        dt_adapt_flag_model.to_csv('./data/oil_'+problem+'_adapt_flag_'+param+'.csv')
         dt_net.to_csv('./data/oil_'+problem+'_net_'+param+'.csv')
         dt_adapt_model.to_csv('./data/oil_'+problem+'_adapt_model_'+param+'.csv')
         dt_net_model.to_csv('./data/oil_'+problem+'_net_model_'+param+'.csv')
+
+        agent = opt_adapt_agent_list[-1]
+        filehandler = open('ambulance_'+problem+'_adapt_'+param, 'wb')
+        pickle.dump(agent, filehandler)
+
+        agent = opt_adapt_model_agent_list[-1]
+        filehandler = open('ambulance_'+problem+'_adapt_model_'+param, 'wb')
+        pickle.dump(agent, filehandler)
