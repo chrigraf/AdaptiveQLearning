@@ -14,14 +14,15 @@ import pickle
 ''' Defining parameters to be used in the experiment'''
 
 # ambulance_list = ['laplace', 'quadratic']
-ambulance_list = ['noise', 'laplace', 'quadratic', 'noise_step']
+ambulance_list = ['noise', 'laplace', 'quadratic', 'sparse']
+# ambulance_list = ['sparse']
 param_list_ambulance = ['1', '10', '50']
 
 for problem in ambulance_list:
     for param in param_list_ambulance:
 
         epLen = 5
-        nEps = 1000
+        nEps = 2000
         numIters = 25
 
         starting_state = 0.5
@@ -37,12 +38,24 @@ for problem in ambulance_list:
         elif problem == 'quadratic':
             env = environment.makeQuadraticOil(epLen, lam, starting_state)
         elif problem == 'noise':
-            env = environment.makeOilEnvironment(epLen, lambda x,a, step: np.exp(-1*lam*np.abs(x*a - .7)), starting_state, 1, lambda x,a : .1*(x+a)**2)
-        elif problem == 'noise_step':
-            env = environment.makeOilEnvironment(epLen, lambda x,a, step: np.exp(-1*lam*np.abs(x*a - .7)), starting_state, 1, lambda x,a : .1*(x+a)**2)
+            env = environment.makeOilEnvironment(epLen, lambda x,a,step: np.exp(-1*lam*np.abs(x*a - .7)), starting_state, 1, lambda x,a,step : .1*(x+a)**2)
+        elif problem == 'sparse':
+            def reward(x,a,step):
+                if step == 1:
+                    reward = (1/5)*step*np.exp(-1*lam*np.abs(x - .5)))
+                elif step == 2:
+                    reward = (1/5)*step*np.exp(-1*lam*np.abs(x - .25)))
+                elif step == 3:
+                    reward = (1/5)*step*np.exp(-1*lam*np.abs(x - .5)))
+                elif step == 4:
+                    reward = (1/5)*step*np.exp(-1*lam*np.abs(x - .75)))
+                else:
+                    reward = (1/5)*step*np.exp(-1*lam*np.abs(x - 1)))
+                return reward
+            env = environment.makeOilEnvironment(epLen, reward, starting_state, 1, lambda x,a,step : .05*(x+a)**2)
         ##### PARAMETER TUNING FOR AMBULANCE ENVIRONMENT
-        scaling_list = [0.01, 0.1, 0.5, 1]
-        # scaling_list = [0.01, 0.1, 0.25, 0.4, 0.5, 0.6, 0.75, 1, 1.5, 2, 5]
+        # scaling_list = [0.1, 0.5, 1]
+        scaling_list = [0.01, 0.1, 0.25, 0.4, 0.5, 0.6, 0.75, 1, 1.5, 2, 5]
         # scaling_list = [0.5, .01] # alpha = 1
         # scaling_list = [1, .4] # alpha = 0
         # scaling_list = [0.5, 0.01] # alpha = 0.25
@@ -172,9 +185,9 @@ for problem in ambulance_list:
         dt_net_model.to_csv('./data/oil_'+problem+'_net_model_'+param+'.csv')
 
         agent = opt_adapt_agent_list[-1]
-        filehandler = open('ambulance_'+problem+'_adapt_'+param, 'wb')
+        filehandler = open('./data/oil_'+problem+'_adapt_'+param+'.obj', 'wb')
         pickle.dump(agent, filehandler)
 
         agent = opt_adapt_model_agent_list[-1]
-        filehandler = open('ambulance_'+problem+'_adapt_model_'+param, 'wb')
+        filehandler = open('./data/oil_'+problem+'_adapt_model_'+param+'.obj', 'wb')
         pickle.dump(agent, filehandler)

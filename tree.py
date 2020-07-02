@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
-
+import matplotlib as mpl
 ''' Implementation of a tree structured used in the Adaptive Discretization Algorithm'''
 
 
@@ -45,6 +45,26 @@ class Tree():
     def get_head(self):
         return self.head
 
+    def get_max_help(self, node):
+        if node.children == None:
+            return node.qVal
+        else:
+            return np.max([self.get_max_help(child) for child in node.children])
+
+    def get_max(self):
+        return self.get_max_help(self.head)
+
+    def get_min_help(self, node):
+        if node.children == None:
+            return node.qVal
+        else:
+            return np.min([self.get_min_help(child) for child in node.children])
+
+    def get_min(self):
+        return self.get_min_help(self.head)
+
+
+
     # Plot function which plots the tree on a graph on [0,1]^2 with the discretization
     def plot(self, fig):
         ax = plt.gca()
@@ -57,7 +77,7 @@ class Tree():
     def plot_node(self, node, ax):
         if node.children == None:
             # print('Child Node!')
-            rect = patches.Rectangle((node.state_val - node.radius,node.action_val-node.radius),node.radius*2,node.radius*2,linewidth=1,edgecolor='r',facecolor='none')
+            rect = patches.Rectangle((node.state_val - node.radius,node.action_val-node.radius),node.radius*2,node.radius*2,linewidth=1,edgecolor='k',facecolor='none')
             ax.add_patch(rect)
             # plt.text(node.state_val, node.action_val, np.around(node.qVal, 3))
         else:
@@ -100,6 +120,33 @@ class Tree():
                 else:
                     pass
         return active_node, qVal
+
+    # Recursive method which plots all subchildren
+    def plot_q_help(self, node, ax, timestep,colors, max_q, min_q):
+        if node.children == None:
+            # print('Child Node!')
+            rect = patches.Rectangle((node.state_val - node.radius, node.action_val - node.radius), node.radius * 2,
+                                     node.radius * 2, linewidth=1, facecolor=colors(int(255*(node.qVal-min_q)/(max_q-min_q))), edgecolor='k')
+            ax.add_patch(rect)
+            # plt.text(node.state_val, node.action_val, np.around(node.qVal, 3))
+        else:
+            for child in node.children:
+                self.plot_q_help(child, ax,timestep,colors, max_q, min_q)
+    # Plot function which plots the tree on a graph on [0,1]^2 with the discretization
+    def plot_q(self, fig, timestep):
+        max_q = self.get_max()
+        min_q = self.get_min()
+
+        colors = plt.cm.RdYlGn
+        ax = plt.gca()
+        self.plot_q_help(self.head, ax, timestep,colors, max_q, min_q)
+        plt.xlabel('State Space')
+        plt.ylabel('Action Space')
+        plt.title('Heat Map of Q Values')
+        norm = mpl.colors.Normalize(vmin=0, vmax=1)
+        sm = plt.cm.ScalarMappable(cmap=colors, norm=norm)
+        sm.set_array([])
+        return fig
 
 
     def get_active_ball(self, state):

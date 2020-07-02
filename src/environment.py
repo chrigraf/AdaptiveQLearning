@@ -176,7 +176,7 @@ class OilEnvironment(Environment):
 
 
         reward = min(1, max(self.oil_prob(self.state, action, self.timestep) - self.cost_param*np.abs(self.state - action),0))
-        newState = min(1, max(0, action + np.random.normal(0, self.noise_variance(self.state, action))))
+        newState = min(1, max(0, action + np.random.normal(0, np.sqrt(self.noise_variance(self.state, action, self.timestep)))))
 
         if self.timestep == self.epLen:
             pContinue = 0
@@ -259,10 +259,10 @@ def makeOilEnvironment(epLen, oil_prob, starting_state, cost_param, noise_varian
     return OilEnvironment(epLen, oil_prob, starting_state, cost_param, noise_variance)
 
 def makeLaplaceOil(epLen, lam, starting_state):
-    return OilEnvironment(epLen, lambda x,a: oil_prob_1(x, lam, .75), starting_state, 0, lambda x,a : 0)
+    return OilEnvironment(epLen, lambda x,a,h: oil_prob_1(x, lam, .75), starting_state, 1, lambda x,a,h : 0)
 
 def makeQuadraticOil(epLen, lam, starting_state):
-    return OilEnvironment(epLen, lambda x,a: oil_prob_2(x, lam, .75), starting_state, 0, lambda x,a : 0)
+    return OilEnvironment(epLen, lambda x,a,h: oil_prob_2(x, lam, .75), starting_state, 1, lambda x,a,h : 0)
 
 def makeTestMDP(epLen):
     return TestContinuousEnvironment(epLen)

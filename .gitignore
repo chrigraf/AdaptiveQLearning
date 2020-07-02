@@ -139,6 +139,7 @@ cython_debug/
 
 
 data/*
-*.ipynb
+figures/*
 tmp.csv
 *.obj
+misc/*
