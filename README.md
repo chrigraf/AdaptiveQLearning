@@ -44,6 +44,6 @@ Each file has parameters at the top which can be changed in order to replicate t
 [here](https://arxiv.org/abs/1910.08151).
 
 \[3\]: Sean R. Sinclair, Tianyu Wang, Gauri Jain, Siddhartha Banerjee, Christina Lee Yu. *Adaptive Discretization for Model Based Reinforcement Learning.* Available
-[Coming Soon]().
+[here](https://arxiv.org/abs/2007.00717).
 
 \[4\]: Zhao Song, Wen Sun. *Efficient Model-free Reinforcement Learning in Metric Spaces.* Available [here](https://arxiv.org/abs/1905.00475).
