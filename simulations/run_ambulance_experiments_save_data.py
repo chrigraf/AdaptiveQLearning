@@ -1,5 +1,7 @@
 import gym
 import numpy as np
+import sys
+sys.path.insert(1, '../')
 from adaptive_Agent import AdaptiveDiscretization
 from eNet_model_Agent import eNetModelBased
 from eNet_Agent import eNet
@@ -91,7 +93,7 @@ for problem in ambulance_list:
 
             agent_list_adap = []
             for _ in range(numIters):
-                agent_list_adap.append(AdaptiveModelBasedDiscretization(epLen, nEps, scaling, 0, True))
+                agent_list_adap.append(AdaptiveModelBasedDiscretization(epLen, nEps, scaling, 0, 2, True))
             #
             dict = {'seed': 1, 'epFreq' : 1, 'targetPath': './tmp.csv', 'deBug' : False, 'nEps': nEps, 'recFreq' : 10, 'numIters' : numIters}
             #

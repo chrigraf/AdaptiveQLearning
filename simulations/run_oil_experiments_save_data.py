@@ -82,7 +82,7 @@ for problem in problem_list:
             #
             agent_list_adap = []
             for _ in range(numIters):
-                agent_list_adap.append(AdaptiveModelBasedDiscretization(epLen, nEps, scaling, 0, False))
+                agent_list_adap.append(AdaptiveModelBasedDiscretization(epLen, nEps, scaling, 0, 2, False))
             #
             dict = {'seed': 1, 'epFreq' : 1, 'targetPath': './tmp.csv', 'deBug' : False, 'nEps': nEps, 'recFreq' : 10, 'numIters' : numIters}
             #
