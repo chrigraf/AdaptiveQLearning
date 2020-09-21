@@ -5,7 +5,7 @@ from tree_model_based import Node, Tree
 
 class AdaptiveModelBasedDiscretization(agent.FiniteHorizonAgent):
 
-    def __init__(self, epLen, numIters, scaling, alpha, flag):
+    def __init__(self, epLen, numIters, scaling, alpha, split_threshold, flag):
         '''args:
             epLen - number of steps per episode
             numIters - total number of iterations
@@ -17,6 +17,7 @@ class AdaptiveModelBasedDiscretization(agent.FiniteHorizonAgent):
         self.numIters = numIters
         self.scaling = scaling
         self.alpha = alpha
+        self.split_threshold = split_threshold
 
         self.flag = flag
 
@@ -82,7 +83,7 @@ class AdaptiveModelBasedDiscretization(agent.FiniteHorizonAgent):
             # print(next_tree.state_leaves)
 
         '''determines if it is time to split the current ball'''
-        if t >= 4**active_node.num_splits:
+        if t >= 2**(self.split_threshold * active_node.num_splits):
             # print('Splitting a ball!!!!')
             if timestep >= 1:
                 children = tree.split_node(active_node, timestep, self.tree_list[timestep-1])

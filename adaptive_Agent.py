@@ -67,9 +67,9 @@ class AdaptiveDiscretization(agent.FiniteHorizonAgent):
         self.greedy = self.greedy
         pass
 
-    def split_ball(self, node):
-        children = self.node.split_ball()
-        pass
+    # def split_ball(self, node):
+    #     children = node.split_ball()
+    #     pass
 
     def greedy(self, state, timestep, epsilon=0):
         '''

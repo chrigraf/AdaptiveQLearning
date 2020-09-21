@@ -23,6 +23,7 @@ class dataUpdateAgent(agent.FiniteHorizonAgent):
     def update_obs(self, obs, action, reward, newObs, timestep):
         '''Add observation to records'''
         self.data.append(newObs)
+        return
 
     def get_num_arms(self):
         return 0

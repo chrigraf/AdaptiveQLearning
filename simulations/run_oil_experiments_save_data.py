@@ -1,5 +1,7 @@
-import gym
+import sys
+sys.path.insert(1, '../')
 import numpy as np
+import gym
 from adaptive_Agent import AdaptiveDiscretization
 from eNet_model_Agent import eNetModelBased
 from eNet_Agent import eNet
@@ -14,12 +16,13 @@ import pickle
 ''' Defining parameters to be used in the experiment'''
 
 # ambulance_list = ['laplace', 'quadratic']
-ambulance_list = ['noise', 'laplace', 'quadratic', 'sparse']
-# ambulance_list = ['sparse']
-param_list_ambulance = ['1', '10', '50']
+# ambulance_list = ['noise', 'laplace', 'quadratic', 'sparse']
+problem_list = ['laplace']
+# param_list_ambulance = ['1', '10', '50']
+param_list = ['1']
 
-for problem in ambulance_list:
-    for param in param_list_ambulance:
+for problem in problem_list:
+    for param in param_list:
 
         epLen = 5
         nEps = 2000
@@ -42,15 +45,15 @@ for problem in ambulance_list:
         elif problem == 'sparse':
             def reward(x,a,step):
                 if step == 1:
-                    reward = (1/5)*step*np.exp(-1*lam*np.abs(x - .5)))
+                    reward = (1/5)*step*np.exp(-1*lam*np.abs(x - .5))
                 elif step == 2:
-                    reward = (1/5)*step*np.exp(-1*lam*np.abs(x - .25)))
+                    reward = (1/5)*step*np.exp(-1*lam*np.abs(x - .25))
                 elif step == 3:
-                    reward = (1/5)*step*np.exp(-1*lam*np.abs(x - .5)))
+                    reward = (1/5)*step*np.exp(-1*lam*np.abs(x - .5))
                 elif step == 4:
-                    reward = (1/5)*step*np.exp(-1*lam*np.abs(x - .75)))
+                    reward = (1/5)*step*np.exp(-1*lam*np.abs(x - .75))
                 else:
-                    reward = (1/5)*step*np.exp(-1*lam*np.abs(x - 1)))
+                    reward = (1/5)*step*np.exp(-1*lam*np.abs(x - 1))
                 return reward
             env = environment.makeOilEnvironment(epLen, reward, starting_state, 1, lambda x,a,step : .05*(x+a)**2)
         ##### PARAMETER TUNING FOR AMBULANCE ENVIRONMENT
@@ -95,7 +98,7 @@ for problem in ambulance_list:
 
             agent_list_adap = []
             for _ in range(numIters):
-                agent_list_adap.append(AdaptiveModelBasedDiscretization(epLen, nEps, scaling, 0, True))
+                agent_list_adap.append(AdaptiveModelBasedDiscretization(epLen, nEps, scaling, 0, 2, True))
             #
             dict = {'seed': 1, 'epFreq' : 1, 'targetPath': './tmp.csv', 'deBug' : False, 'nEps': nEps, 'recFreq' : 10, 'numIters' : numIters}
             #
