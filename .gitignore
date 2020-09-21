@@ -143,4 +143,4 @@ figures/*
 tmp.csv
 *.obj
 misc/*
-*.ipynb
+test_files/*
