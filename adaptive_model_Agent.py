@@ -5,12 +5,14 @@ from tree_model_based import Node, Tree
 
 class AdaptiveModelBasedDiscretization(agent.FiniteHorizonAgent):
 
-    def __init__(self, epLen, numIters, scaling, alpha, split_threshold, flag):
+    def __init__(self, epLen, numIters, scaling, alpha, split_threshold, inherit_flag, flag):
         '''args:
             epLen - number of steps per episode
             numIters - total number of iterations
             scaling - scaling parameter for UCB term
             alpha - parameter to add a prior to the transition kernels
+            inherit_flag - boolean on whether to inherit when making children nodes
+            flag - boolean of full (true) or one-step updates (false)
         '''
 
         self.epLen = epLen
@@ -19,15 +21,15 @@ class AdaptiveModelBasedDiscretization(agent.FiniteHorizonAgent):
         self.alpha = alpha
         self.split_threshold = split_threshold
 
+        self.inherit_flag = inherit_flag
         self.flag = flag
-
         # List of tree's, one for each step
         self.tree_list = []
 
         # Makes a new partition for each step and adds it to the list of trees
-        for h in range(epLen):
+        for _ in range(epLen):
             # print(h)
-            tree = Tree(epLen, self.flag)
+            tree = Tree(epLen, self.inherit_flag)
             self.tree_list.append(tree)
 
     def reset(self):
@@ -36,8 +38,8 @@ class AdaptiveModelBasedDiscretization(agent.FiniteHorizonAgent):
         self.tree_list = []
 
         # Makes a new partition for each step and adds it to the list of trees
-        for h in range(self.epLen):
-            tree = Tree(self.epLen, self.flag)
+        for _ in range(self.epLen):
+            tree = Tree(self.epLen, self.inherit_flag)
             self.tree_list.append(tree)
 
         # Gets the number of arms for each tree and adds them together
@@ -82,13 +84,27 @@ class AdaptiveModelBasedDiscretization(agent.FiniteHorizonAgent):
             # print(active_node.pEst)
             # print(next_tree.state_leaves)
 
+        if self.flag == False:
+            if timestep == self.epLen - 1:
+                active_node.qVal = min(active_node.qVal, self.epLen, active_node.rEst + self.scaling / np.sqrt(active_node.num_visits))
+            else:
+                next_tree = self.tree_list[timestep+1]
+                vEst = np.dot((np.asarray(active_node.pEst)+self.alpha) / (np.sum(active_node.pEst)+len(next_tree.state_leaves)*self.alpha), next_tree.vEst)
+                active_node.qVal = min(active_node.qVal, self.epLen, active_node.rEst + vEst + self.scaling / np.sqrt(active_node.num_visits))
+            # Update estimate of value function                
+            index = 0
+            for state_val in tree.state_leaves:
+                _, qMax = tree.get_active_ball(state_val)
+                tree.vEst[index] = min(qMax, self.epLen, tree.vEst[index])
+                index += 1
+
         '''determines if it is time to split the current ball'''
         if t >= 2**(self.split_threshold * active_node.num_splits):
             # print('Splitting a ball!!!!')
             if timestep >= 1:
-                children = tree.split_node(active_node, timestep, self.tree_list[timestep-1])
+                _ = tree.split_node(active_node, timestep, self.tree_list[timestep-1])
             else:
-                children = tree.split_node(active_node, timestep, None)
+                _ = tree.split_node(active_node, timestep, None)
 
     def update_policy(self, k):
         '''Update internal policy based upon records'''
@@ -97,49 +113,52 @@ class AdaptiveModelBasedDiscretization(agent.FiniteHorizonAgent):
         # print('#######################')
 
         # Solves the empirical Bellman equations
-        for h in np.arange(self.epLen-1,-1,-1):
-            # print('Estimates for step: ' + str(h))
 
-            # Gets the current tree for this specific time step
-            tree = self.tree_list[h]
-            for node in tree.tree_leaves:
-                # If the node has not been visited before - set its Q Value
-                # to be optimistic
-                if node.num_unique_visits == 0:
-                    node.qVal = self.epLen
-                else:
-                    # Otherwise solve for the Q Values with the bonus term
+        if self.flag:
+            for h in np.arange(self.epLen-1,-1,-1):
+                # print('Estimates for step: ' + str(h))
 
-                    # If h == H then the value function for the next step is zero
-                    if h == self.epLen - 1:
-                        # print(node.qVal)
-                        # print(self.epLen)
-                        # print(node.rEst)
-                        node.qVal = min(node.qVal, self.epLen, node.rEst + self.scaling / np.sqrt(node.num_visits))
+                # Gets the current tree for this specific time step
+                tree = self.tree_list[h]
+                for node in tree.tree_leaves:
+                    # If the node has not been visited before - set its Q Value
+                    # to be optimistic
+                    if node.num_unique_visits == 0:
+                        node.qVal = self.epLen
+                    else:
+                        # Otherwise solve for the Q Values with the bonus term
 
-                    else: # Gets the next tree to estimate the transition kernel
-                        next_tree = self.tree_list[h+1]
-                        vEst = np.dot((np.asarray(node.pEst)+self.alpha) / (np.sum(node.pEst)+len(next_tree.state_leaves)*self.alpha), next_tree.vEst)
-                        node.qVal = min(node.qVal, self.epLen, node.rEst + vEst + self.scaling / np.sqrt(node.num_visits))
-                # print(node.state_val, node.action_val, node.qVal)
-            # After updating the Q Value for each node - computes the estimate of the value function
-            index = 0
-            for state_val in tree.state_leaves:
-                _, qMax = tree.get_active_ball(state_val)
-                tree.vEst[index] = min(qMax, self.epLen, tree.vEst[index])
-                index += 1
-            # print('### PRINTING STATE LEAVES  AND VALUE ESTIMATES!')
-            # print(tree.state_leaves)
-            # print(tree.vEst)
-            # print('#### DDONEE ###')
+                        # If h == H then the value function for the next step is zero
+                        if h == self.epLen - 1:
+                            # print(node.qVal)
+                            # print(self.epLen)
+                            # print(node.rEst)
+                            node.qVal = min(node.qVal, self.epLen, node.rEst + self.scaling / np.sqrt(node.num_visits))
 
-        self.greedy = self.greedy
+                        else: # Gets the next tree to estimate the transition kernel
+                            next_tree = self.tree_list[h+1]
+                            vEst = np.dot((np.asarray(node.pEst)+self.alpha) / (np.sum(node.pEst)+len(next_tree.state_leaves)*self.alpha), next_tree.vEst)
+                            node.qVal = min(node.qVal, self.epLen, node.rEst + vEst + self.scaling / np.sqrt(node.num_visits))
+                    # print(node.state_val, node.action_val, node.qVal)
+                # After updating the Q Value for each node - computes the estimate of the value function
+                index = 0
+                for state_val in tree.state_leaves:
+                    _, qMax = tree.get_active_ball(state_val)
+                    tree.vEst[index] = min(qMax, self.epLen, tree.vEst[index])
+                    index += 1
+                # print('### PRINTING STATE LEAVES  AND VALUE ESTIMATES!')
+                # print(tree.state_leaves)
+                # print(tree.vEst)
+                # print('#### DDONEE ###')
+
+        # TODO: Verify if this is needed
+        # self.greedy = self.greedy
 
         pass
 
     def split_ball(self, node):
-        children = self.node.split_ball()
-        pass
+        children = node.split_ball()
+        return children
 
     def greedy(self, state, timestep, epsilon=0):
         '''
@@ -156,7 +175,7 @@ class AdaptiveModelBasedDiscretization(agent.FiniteHorizonAgent):
         tree = self.tree_list[timestep]
 
         # Gets the selected ball
-        active_node, qVal = tree.get_active_ball(state)
+        active_node, _ = tree.get_active_ball(state)
 
         # Picks an action uniformly in that ball
         action = np.random.uniform(active_node.action_val - active_node.radius, active_node.action_val + active_node.radius)

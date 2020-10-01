@@ -5,7 +5,7 @@ from src import agent
 ''' epsilon Net agent '''
 class eNetModelBased(agent.FiniteHorizonAgent):
 
-    def __init__(self, action_net, state_net, epLen, scaling, alpha):
+    def __init__(self, action_net, state_net, epLen, scaling, alpha, flag):
         '''
         args:
             - action_net - epsilon net of action space
@@ -13,13 +13,14 @@ class eNetModelBased(agent.FiniteHorizonAgent):
             - epLen - steps per episode
             - scaling - scaling parameter for UCB terms
             - alpha - used in adding a prior on the transition kernel
+            - flag - used in determining full update (TRUE) or one-step update (FALSE)
         '''
         self.action_net = action_net
         self.state_net = state_net
         self.epLen = epLen
         self.scaling = scaling
         self.alpha = alpha
-
+        self.flag = flag
 
         '''
         Initializes the estimates to be used in the algorithm:
@@ -63,6 +64,8 @@ class eNetModelBased(agent.FiniteHorizonAgent):
         t = self.num_visits[timestep, state_discrete, action_discrete]
         self.rEst[timestep, state_discrete, action_discrete] = ((t-1)*self.rEst[timestep, state_discrete, action_discrete] + reward) / t
 
+
+
     def get_num_arms(self):
         ''' Returns the number of arms'''
         return self.epLen * len(self.state_net) * len(self.action_net)
@@ -73,25 +76,28 @@ class eNetModelBased(agent.FiniteHorizonAgent):
         # Update value estimates
 
         # Solves the full Bellman equations by looping backwards
-        for h in np.arange(self.epLen-1,-1,-1):
-            for state in range(len(self.state_net)):
-                for action in range(len(self.action_net)):
+        if self.flag:
+            for h in np.arange(self.epLen-1,-1,-1):
+                for state in range(len(self.state_net)):
+                    for action in range(len(self.action_net)):
 
-                    # If a state action has not been visited, initialize to H
-                    # for optimism
-                    if self.num_visits[h, state, action] == 0:
-                        self.qVals[h, state, action] = self.epLen
-                    else:
-
-                        # Otherwise estimates based off the Bellman equations
-                        if h == self.epLen - 1: # for the last step the value function at the next step is zero
-                            self.qVals[h, state, action] = min(self.qVals[h, state, action], self.epLen, self.rEst[h, state, action] + self.scaling / np.sqrt(self.num_visits[h, state, action]))
+                        # If a state action has not been visited, initialize to H
+                        # for optimism
+                        if self.num_visits[h, state, action] == 0:
+                            self.qVals[h, state, action] = self.epLen
                         else:
-                            vEst = np.dot(self.vVals[h+1, :], (self.pEst[h, state, action, :] + self.alpha) / (np.sum(self.pEst[h, state, action, :]) + len(self.state_net)*self.alpha))
-                            self.qVals[h, state, action]  = min(self.qVals[h, state, action], self.epLen, self.rEst[h, state, action] + self.scaling / np.sqrt(self.num_visits[h, state, action]) + vEst)
-                # Updates the estimate of the value function
-                self.vVals[h, state] = min(self.epLen, np.max(self.qVals[h, state, :]))
-        self.greedy = self.greedy
+
+                            # Otherwise estimates based off the Bellman equations
+                            if h == self.epLen - 1: # for the last step the value function at the next step is zero
+                                self.qVals[h, state, action] = min(self.qVals[h, state, action], self.epLen, self.rEst[h, state, action] + self.scaling / np.sqrt(self.num_visits[h, state, action]))
+                            else:
+                                vEst = np.dot(self.vVals[h+1, :], (self.pEst[h, state, action, :] + self.alpha) / (np.sum(self.pEst[h, state, action, :]) + len(self.state_net)*self.alpha))
+                                self.qVals[h, state, action]  = min(self.qVals[h, state, action], self.epLen, self.rEst[h, state, action] + self.scaling / np.sqrt(self.num_visits[h, state, action]) + vEst)
+                    # Updates the estimate of the value function
+                    self.vVals[h, state] = min(self.epLen, np.max(self.qVals[h, state, :]))
+
+        # TODO: Again - verify if this is needed.
+        # self.greedy = self.greedy
 
 
     def greedy(self, state, timestep, epsilon=0):
@@ -113,5 +119,20 @@ class eNetModelBased(agent.FiniteHorizonAgent):
         return self.action_net[action]
 
     def pick_action(self, state, step):
+        if self.flag == False:
+            state_discrete = np.argmin(np.abs(np.asarray(self.state_net) - state))
+            for action in range(len(self.action_net)):
+                if self.num_visits[step, state_discrete, action] == 0:
+                        self.qVals[step, state_discrete, action] = self.epLen
+                else:
+                    if step == self.epLen - 1: # for the last step the value function at the next step is zero
+                        self.qVals[step, state_discrete, action] = min(self.qVals[step, state_discrete, action], self.epLen, self.rEst[step, state_discrete, action] + self.scaling / np.sqrt(self.num_visits[step, state_discrete, action]))
+                    else:
+                        vEst = np.dot(self.vVals[step+1, :], (self.pEst[step, state_discrete, action, :] + self.alpha) / (np.sum(self.pEst[step, state_discrete, action, :]) + len(self.state_net)*self.alpha))
+                        self.qVals[step, state_discrete, action]  = min(self.qVals[step, state_discrete, action], self.epLen, self.rEst[step, state_discrete, action] + self.scaling / np.sqrt(self.num_visits[step, state_discrete, action]) + vEst)
+                    # Updates the estimate of the value function
+                    self.vVals[step, state_discrete] = min(self.epLen, np.max(self.qVals[step, state_discrete, :]))                   
+
+
         action = self.greedy(state, step)
         return action

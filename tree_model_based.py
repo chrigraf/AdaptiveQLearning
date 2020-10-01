@@ -135,7 +135,7 @@ class Tree():
             node.pEst.pop(parent_index)
             # print(len(node.pEst))
             # print('Adding on entries now!')
-            for i in range(num_children):
+            for _ in range(num_children):
                 node.pEst.append(pEst_parent / num_children)
             # print(len(node.pEst))
             # print(node.pEst)
@@ -186,6 +186,8 @@ class Tree():
             for child in node.children:
                 self.plot_q_help(child, ax,timestep,colors, min_q, max_q)
     # Plot function which plots the tree on a graph on [0,1]^2 with the discretization
+
+    
     def plot_q(self, fig, timestep):
 
         # Get maximum and minimum q_value across all leaves in that tree to be used
@@ -200,8 +202,8 @@ class Tree():
             elif node.qVal <= min_q:
                 min_q = node.qVal
 
-        colors = plt.cm.RdYlGn
         ax = plt.gca()
+        colors = plt.cm.RdYlGn
         self.plot_q_help(self.head, ax, timestep,colors, min_q, max_q)
         plt.xlabel('State Space')
         plt.ylabel('Action Space')

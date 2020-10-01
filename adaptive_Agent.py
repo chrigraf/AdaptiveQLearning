@@ -18,14 +18,14 @@ class AdaptiveDiscretization(agent.FiniteHorizonAgent):
         self.tree_list = []
 
         # Makes a new partition for each step and adds it to the list of trees
-        for h in range(epLen):
+        for _ in range(epLen):
             tree = Tree(epLen)
             self.tree_list.append(tree)
 
     def reset(self):
         # Resets the agent by setting all parameters back to zero
         self.tree_list = []
-        for h in range(self.epLen):
+        for _ in range(self.epLen):
             tree = Tree(self.epLen)
             self.tree_list.append(tree)
 
@@ -40,6 +40,7 @@ class AdaptiveDiscretization(agent.FiniteHorizonAgent):
         '''Add observation to records'''
         # Gets the active tree based on current timestep
         tree = self.tree_list[timestep]
+
         # Gets the active ball by finding the argmax of Q values of relevant
         active_node, _ = tree.get_active_ball(obs)
 
@@ -49,8 +50,10 @@ class AdaptiveDiscretization(agent.FiniteHorizonAgent):
             # Gets the next tree to get the approximation to the value function
             # at the next timestep
             new_tree = self.tree_list[timestep + 1]
-            new_active, new_q = new_tree.get_active_ball(newObs)
+            _, new_q = new_tree.get_active_ball(newObs)
             vFn = min(self.epLen, new_q)
+
+
         # Updates parameters for the node
         active_node.num_visits += 1
         t = active_node.num_visits
@@ -62,14 +65,6 @@ class AdaptiveDiscretization(agent.FiniteHorizonAgent):
         if t >= 4**active_node.num_splits:
             active_node.split_node()
 
-    def update_policy(self, k):
-        '''Update internal policy based upon records'''
-        self.greedy = self.greedy
-        pass
-
-    # def split_ball(self, node):
-    #     children = node.split_ball()
-    #     pass
 
     def greedy(self, state, timestep, epsilon=0):
         '''
@@ -86,12 +81,19 @@ class AdaptiveDiscretization(agent.FiniteHorizonAgent):
         tree = self.tree_list[timestep]
 
         # Gets the selected ball
-        active_node, qVal = tree.get_active_ball(state)
+        active_node, _ = tree.get_active_ball(state)
 
         # Picks an action uniformly in that ball
         action = np.random.uniform(active_node.action_val - active_node.radius, active_node.action_val + active_node.radius)
 
         return action
+
+    def update_policy(self, k):
+        '''Update internal policy based upon records'''
+        # TODO: Verify this is needed.
+        # self.greedy = self.greedy
+        return
+
 
     def pick_action(self, state, timestep):
         action = self.greedy(state, timestep)

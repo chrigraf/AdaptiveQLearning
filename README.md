@@ -1,6 +1,9 @@
-# Adaptive Discretization for Reinforcement Learning
+# Adaptive Discretization for Reinforcement Learning in Metric Spaces
 This repository contains a reference implementation for the algorithms
-appearing in the papers \[2\] for model-free Q learning in continuous spaces and \[3\] for model-based value iteration in continuous spaces.
+appearing in the papers \[2\] for model-free Q learning in continuous spaces and \[3\] for model-based value iteration in continuous spaces.  We also include a fixed discretization implementation of model-free and model-based algorithms for discrete spaces from \[4\] and \[5\] respectively.
+
+Citation Instructions:
+
 
 ### Dependencies
 The code has been tested in `Python 3.7.7` and depends on a number of Python
@@ -47,3 +50,5 @@ Each file has parameters at the top which can be changed in order to replicate t
 [here](https://arxiv.org/abs/2007.00717).
 
 \[4\]: Zhao Song, Wen Sun. *Efficient Model-free Reinforcement Learning in Metric Spaces.* Available [here](https://arxiv.org/abs/1905.00475).
+
+\[5\]: Mohammad Gheshlaghi Azar, Ian Osband, and Remi Munos. *Minimax Regret Bounds for Reinforcement Learning.* Available [here](https://arxiv.org/abs/1703.05449).

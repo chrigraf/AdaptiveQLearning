@@ -27,6 +27,7 @@ class eNet(agent.FiniteHorizonAgent):
         self.qVals = np.ones([self.epLen, len(self.state_net), len(self.action_net)], dtype=np.float32) * self.epLen
         self.num_visits = np.zeros([self.epLen, len(self.state_net), len(self.action_net)], dtype=np.float32)
 
+
         '''
             Adds the observation to records by using the update formula
         '''
@@ -57,7 +58,8 @@ class eNet(agent.FiniteHorizonAgent):
 
     def update_policy(self, k):
         '''Update internal policy based upon records'''
-        self.greedy = self.greedy
+        # TODO: Verify if this is needed
+        # self.greedy = self.greedy
         # print('Update policy episode: ' + str(k))
         # print(self.qVals[self.epLen-1, :, :])
         return
