@@ -40,11 +40,11 @@ These agents are imported and used in the different tests.  To run the experimen
 * `run_oil_experiments_save_data.py`
 * `run_ambulance_experiments_save_data.py`
 
-Each file has parameters at the top which can be changed in order to replicate the parameters considered for each experiment in the paper.  We also include a how-to jupyter notebook walking through the code and an example in `walkthrough.ipynb`.
+Each file has parameters at the top which can be changed in order to replicate the parameters considered for each experiment in the paper.  We also include a how-to jupyter notebook walking through the code and an example in `walkthrough.ipynb`.  Note that these use parallel processing and multiple CPU cores in order to speed up the run-time.
 
 ## Creating the Figures
 
-The previous `run_....py` files are used to create a `.csv` files of the performance of each algorithm.  In order to create the plots used in the figures, see the jupyter notebooks `test_plot.ipynb` and `simulate_q_values_oil.ipyn`.
+The previous `run_....py` files are used to create a `.csv` files of the performance of each algorithm.  In order to create the plots used in the figures, see the jupyter notebooks `test_plot.ipynb` and `simulate_q_values_oil.ipynb`.  Due to storage limitations the final data files are omitted from this repo.
 
 
 ## Citing
@@ -94,3 +94,9 @@ and for `adaMB`:
 \[4\]: Zhao Song, Wen Sun. *Efficient Model-free Reinforcement Learning in Metric Spaces.* Available [here](https://arxiv.org/abs/1905.00475).
 
 \[5\]: Mohammad Gheshlaghi Azar, Ian Osband, and Remi Munos. *Minimax Regret Bounds for Reinforcement Learning.* Available [here](https://arxiv.org/abs/1703.05449).
+
+## Contributing
+
+If you'd like to contribute, or have any suggestions for these guidelines, you can contact us at `srs429 at cornell dot edu` or open an issue on this GitHub repository.
+
+All contributions welcome! All content in this repository is licensed under the MIT license.
