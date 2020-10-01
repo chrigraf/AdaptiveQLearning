@@ -1,11 +1,11 @@
 # Adaptive Discretization for Reinforcement Learning in Metric Spaces
+
+![discretization plot](discretization_figure.PNG)
+
 This repository contains a reference implementation for the algorithms
 appearing in the papers \[2\] for model-free Q learning in continuous spaces and \[3\] for model-based value iteration in continuous spaces.  We also include a fixed discretization implementation of model-free and model-based algorithms for discrete spaces from \[4\] and \[5\] respectively.
 
-Citation Instructions:
-
-
-### Dependencies
+## Dependencies
 The code has been tested in `Python 3.7.7` and depends on a number of Python
 packages. For the core implementation, found under `src/` we include the following files:
 
@@ -24,14 +24,17 @@ the following packages are required:
 * pandas 1.00.3
 * seaborn 0.10.1
 
-### Quick Tour
 
-We offer implementations for four algorithms.  First, an adaptive discretization for model-free Q learning from \[2\] and its corresponding model-free epsilon net algorithm from \[4\].  We also include implementation of AdaMB from \[3\] and an epsilon net UCBVI algorithm.  All algorithms are implemented with a state space and action space of [0,1] in mind, but for an extension to higher-dimensional space please see the `multi_dimension` subfolder.
+## Quick Tour
+
+We offer implementations for four algorithms.  First, an adaptive discretization for model-free Q learning from \[2\] and its corresponding model-free epsilon net algorithm from \[4\].  We also include implementation of AdaMB from \[3\] and an epsilon net UCBVI algorithm \[5\].  All algorithms are implemented with a state space and action space of [0,1] in mind, but for an extension to higher-dimensional space please see the `multi_dimension` subfolder.
 
 The following files implement the different algorithms:
-* `adaptive_Agent.py`: implements the Adaptive Discretization algorithm
-* `eNet_Agent.py`: implements the discrete algorithm on the epsilon net
-* `data_Agent.py`: implements the heuristic algorithms discussed for the ambulance problem
+* `adaptive_Agent.py`: implements `adaQL` \[1\]
+* `adaptive_model_Agent.py`: implements `adaMB` \[2\]
+* `eNet_Agent.py`: implements the discrete model free algorithm on the epsilon net \[4\]
+* `data_Agent.py`: implements the heuristic algorithms discussed for the ambulance problem in \[1\]
+* `eNet_model_Agent`: implements the discrete model based algorithm on an epsilon net \[5\]
 
 These agents are imported and used in the different tests.  To run the experiments used in the papers the following two files can be used.
 * `run_oil_experiments_save_data.py`
@@ -39,7 +42,46 @@ These agents are imported and used in the different tests.  To run the experimen
 
 Each file has parameters at the top which can be changed in order to replicate the parameters considered for each experiment in the paper.  We also include a how-to jupyter notebook walking through the code and an example in `walkthrough.ipynb`.
 
-### Bibliography
+## Creating the Figures
+
+The previous `run_....py` files are used to create a `.csv` files of the performance of each algorithm.  In order to create the plots used in the figures, see the jupyter notebooks `test_plot.ipynb` and `simulate_q_values_oil.ipyn`.
+
+
+## Citing
+
+If you use `adaMB` or `adaQL` in your work, please cite the accompanying [paper] for `adaMB`:
+
+```bibtex
+@misc{sinclair2020adaptive,
+      title={Adaptive Discretization for Model-Based Reinforcement Learning}, 
+      author={Sean R. Sinclair and Tianyu Wang and Gauri Jain and Siddhartha Banerjee and Christina Lee Yu},
+      year={2020},
+      eprint={2007.00717},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG}
+}
+```
+and for `adaMB`:
+```bibtex
+@article{Sinclair_2019,
+   title={Adaptive Discretization for Episodic Reinforcement Learning in Metric Spaces},
+   volume={3},
+   ISSN={2476-1249},
+   url={http://dx.doi.org/10.1145/3366703},
+   DOI={10.1145/3366703},
+   number={3},
+   journal={Proceedings of the ACM on Measurement and Analysis of Computing Systems},
+   publisher={Association for Computing Machinery (ACM)},
+   author={Sinclair, Sean R. and Banerjee, Siddhartha and Yu, Christina Lee},
+   year={2019},
+   month={Dec},
+   pages={1–44}
+}
+
+}
+```
+
+## Bibliography
 
 \[1\]: Ian Osband, TabulaRL (2017), Github Repository. https://github.com/iosband/TabulaRL
 
