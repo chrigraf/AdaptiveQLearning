@@ -106,7 +106,7 @@ for problem in ambulance_list:
 
         epLen = 5
         nEps = 2000
-        numIters = 25
+        numIters = 200
         if problem == 'beta':
             def arrivals(step):
                 return np.random.beta(5,2)

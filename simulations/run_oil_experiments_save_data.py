@@ -111,7 +111,7 @@ for problem in problem_list:
 
         epLen = 5
         nEps = 2000
-        numIters = 50 
+        numIters = 200 
 
         starting_state = 0.5
         if param == '1':
